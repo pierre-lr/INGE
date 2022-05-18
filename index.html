@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Leaflet sample</title>
+    <link rel="stylesheet" href="style.css" type="text/css"/>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css"
+        integrity="sha512-hoalWLoI8r4UszCkZ5kL8vayOGVae1oxXe/2A4AO6J9+580uKHDO3JdHb7NzwwzK5xr/Fs0W40kiNHxM9vyTtQ=="
+        crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js"
+        integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ=="
+        crossorigin=""></script>
+
+    <!-- Import datasets -->
+    <script src="dataset/regionGrandEst.js" type="text/javascript"></script>
+    <script src="dataset/departementsGrandEst.js" type="text/javascript"></script>
+</head>
+
+<body>
+    <h1>Impacts positifs de la numérisation dans la région Grand-Est.</h1>
+    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Accusamus atque nisi, dignissimos, quod natus totam a mollitia officiis ut rem vel explicabo incidunt eos odio, expedita consequatur ex deserunt? Tempora.</p>
+    <h2>Carte Intéractive</h2>
+    <div id="map"></div>
+    <script type="text/javascript">
+        // Import Data
+        var regionGrandEst = L.geoJSON(
+            regionGrandEst, {
+                style: {
+                    fillOpacity: 0
+                }
+            }
+ );
+        var departementsGrandEst = L.geoJSON(departementsGrandEst, {
+                style: {
+                    fillOpacity: 0
+                }
+            });
+
+        // Creating map options
+        var mapOptions = {
+            center: [48.85, 6.2],
+            zoom: 8
+        }
+
+        // Creating a map object
+        var map = new L.map('map', mapOptions);
+
+        // Creating a Layer object
+        
+        var TileLayer = new L.TileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', 
+        {
+            attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+            maxZoom: 18,
+            id: 'mapbox/light-v10',
+            tileSize: 512,
+            zoomOffset: -1,
+            accessToken: 'pk.eyJ1IjoicGxhcm9jY2EiLCJhIjoiY2wzYmNvajl4MGVjeTNrbnJyZDNvdTBzYSJ9.maFYrWAbWU8Wr6ITgj9XCA',
+        }
+        ).addTo(map);
+
+        /* Overlay */
+        var overlayMaps = {
+                "Region": regionGrandEst
+            };
+        map.addLayer(regionGrandEst); //define default layer
+        var layerControl = L.control.layers(null, overlayMaps).addTo(map);
+        layerControl.addOverlay(departementsGrandEst, "Départements");
+    </script>
+    <h2>Crédits</h2>
+    <ul>
+        <li>
+            <b>Visualisation :</b> Leaflet
+            <b>Fond de carte :</b> Mapbox
+        </li>
+    </ul>
+    <h3>Données</h3>
+    <ul>
+        <li>
+            <b>Formes de la région Grand-Est et ses départements :</b> Grégoire David, <a href="https://france-geojson.gregoiredavid.fr/">france-geojson</a>.
+        </li>
+    </ul>
+</body>
+
+</html>
