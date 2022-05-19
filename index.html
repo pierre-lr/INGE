@@ -15,6 +15,7 @@
     <!-- Import datasets -->
     <script src="dataset/regionGrandEst.js" type="text/javascript"></script>
     <script src="dataset/departementsGrandEst.js" type="text/javascript"></script>
+    <script src="dataset/grandEstEducation.js" type="text/javascript"></script>
 </head>
 
 <body>
@@ -23,6 +24,36 @@
     <h2>Carte Intéractive</h2>
     <div id="map"></div>
     <script type="text/javascript">
+    //utils functions
+        //pointToLayers
+        //TODO : functionfactory taking a specific color
+            var collegeMarkerOptions = {
+                radius: 8,
+                fillColor: "#FFFA2D",
+                color: "#000",
+                weight: 1,
+                opacity: 1,
+                fillOpacity: 0.8
+            };
+
+            var lyceeMarkerOptions = {
+                    radius: 8,
+                    fillColor: "#FFD72D",
+                    color: "#000",
+                    weight: 1,
+                    opacity: 1,
+                    fillOpacity: 0.8
+                };
+            
+            var superieurMarkerOptions = {
+                    radius: 8,
+                    fillColor: "#FFA400",
+                    color: "#000",
+                    weight: 1,
+                    opacity: 1,
+                    fillOpacity: 0.8
+                };
+        
         // Import Data
         var regionGrandEst = L.geoJSON(
             regionGrandEst, {
@@ -30,13 +61,54 @@
                     fillOpacity: 0
                 }
             }
- );
+            );
         var departementsGrandEst = L.geoJSON(departementsGrandEst, {
                 style: {
                     fillOpacity: 0
                 }
             });
 
+        //Séparation des établissement en fonction de 3 types et creation des points
+
+        var superieurs = L.geoJSON(grandEstEducation.features.filter(item => {
+                if (item.properties.type.includes("university")) {
+                    return item.properties.type.includes("university");
+                }
+                else if (item.properties.type.includes("college")) {
+                    return item.properties.type.includes("college");
+                }
+            }), {
+                pointToLayer: function (feature, latlng) {
+                    return L.circleMarker(latlng, superieurMarkerOptions);
+                }
+            });
+
+        var lycées = L.geoJSON(grandEstEducation.features.filter(item => {
+                if (item.properties.type_fr) {
+                    return (item.properties.type_fr.includes("lycée"));
+                }
+
+            }), {
+                pointToLayer: function (feature, latlng) {
+                    return L.circleMarker(latlng, lyceeMarkerOptions);
+                }
+            });
+        
+        var collèges = L.geoJSON(grandEstEducation.features.filter(item => {
+                if (item.properties.type_fr) {
+                    return (item.properties.type_fr.includes("collège"));
+                }
+
+            }), {
+                pointToLayer: function (feature, latlng) {
+                    return L.circleMarker(latlng, collegeMarkerOptions);
+                }
+            });
+
+        // 
+        /* console.log(Object.keys(lycées._layers).length + Object.keys(collèges._layers).length)
+        donne 851 établissements secondaires dans la base sur els 912 référencés par l'académie */
+        
         // Creating map options
         var mapOptions = {
             center: [48.85, 6.2],
@@ -66,11 +138,17 @@
         map.addLayer(regionGrandEst); //define default layer
         var layerControl = L.control.layers(null, overlayMaps).addTo(map);
         layerControl.addOverlay(departementsGrandEst, "Départements");
+        layerControl.addOverlay(superieurs, "Établissements supérieurs");
+        layerControl.addOverlay(lycées, "Lycées");
+        layerControl.addOverlay(collèges, "Collèges");
+        //layerControl.addOverlay(nancyEducation, "Lieux d'enseignement");
     </script>
     <h2>Crédits</h2>
     <ul>
         <li>
             <b>Visualisation :</b> Leaflet
+        </li>
+        <li>
             <b>Fond de carte :</b> Mapbox
         </li>
     </ul>
@@ -78,6 +156,9 @@
     <ul>
         <li>
             <b>Formes de la région Grand-Est et ses départements :</b> Grégoire David, <a href="https://france-geojson.gregoiredavid.fr/">france-geojson</a>.
+        </li>
+        <li>
+            <b>Établissement éducatifs :</b> <a href="https://geodatamine.fr/">GéoDataMine</a> 
         </li>
     </ul>
 </body>
