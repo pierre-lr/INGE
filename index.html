@@ -1,166 +1,183 @@
 <!DOCTYPE html>
 <html>
-
-<head>
+  <head>
     <title>Leaflet sample</title>
-    <link rel="stylesheet" href="style.css" type="text/css"/>
+    <link rel="stylesheet" href="style.css" type="text/css" />
 
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css"
-        integrity="sha512-hoalWLoI8r4UszCkZ5kL8vayOGVae1oxXe/2A4AO6J9+580uKHDO3JdHb7NzwwzK5xr/Fs0W40kiNHxM9vyTtQ=="
-        crossorigin="" />
-    <script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js"
-        integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ=="
-        crossorigin=""></script>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css"
+      integrity="sha512-hoalWLoI8r4UszCkZ5kL8vayOGVae1oxXe/2A4AO6J9+580uKHDO3JdHb7NzwwzK5xr/Fs0W40kiNHxM9vyTtQ=="
+      crossorigin=""
+    />
+    <script
+      src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js"
+      integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ=="
+      crossorigin=""
+    ></script>
 
     <!-- Import datasets -->
     <script src="dataset/regionGrandEst.js" type="text/javascript"></script>
-    <script src="dataset/departementsGrandEst.js" type="text/javascript"></script>
+    <script
+      src="dataset/departementsGrandEst.js"
+      type="text/javascript"
+    ></script>
     <script src="dataset/grandEstEducation.js" type="text/javascript"></script>
-</head>
+  </head>
 
-<body>
+  <body>
     <h1>Impacts positifs de la numérisation dans la région Grand-Est.</h1>
-    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Accusamus atque nisi, dignissimos, quod natus totam a mollitia officiis ut rem vel explicabo incidunt eos odio, expedita consequatur ex deserunt? Tempora.</p>
+    <p>
+      Lorem ipsum dolor sit amet consectetur adipisicing elit. Accusamus atque
+      nisi, dignissimos, quod natus totam a mollitia officiis ut rem vel
+      explicabo incidunt eos odio, expedita consequatur ex deserunt? Tempora.
+    </p>
     <h2>Carte Intéractive</h2>
     <div id="map"></div>
     <script type="text/javascript">
-    //utils functions
-        //pointToLayers
-        //TODO : functionfactory taking a specific color
-            var collegeMarkerOptions = {
-                radius: 8,
-                fillColor: "#FFFA2D",
-                color: "#000",
-                weight: 1,
-                opacity: 1,
-                fillOpacity: 0.8
-            };
+      //utils functions
+      //pointToLayers
+      //createMarkerOptions
+      function createMarkerOptions(hexaColor){
+        return {
+          radius: 8,
+          fillColor: hexaColor,
+          color: "#000",
+          weight: 1,
+          opacity: 1,
+          fillOpacity: 0.5,
+        };
+      }
 
-            var lyceeMarkerOptions = {
-                    radius: 8,
-                    fillColor: "#FFD72D",
-                    color: "#000",
-                    weight: 1,
-                    opacity: 1,
-                    fillOpacity: 0.8
-                };
-            
-            var superieurMarkerOptions = {
-                    radius: 8,
-                    fillColor: "#FFA400",
-                    color: "#000",
-                    weight: 1,
-                    opacity: 1,
-                    fillOpacity: 0.8
-                };
-        
-        // Import Data
-        var regionGrandEst = L.geoJSON(
-            regionGrandEst, {
-                style: {
-                    fillOpacity: 0
-                }
-            }
-            );
-        var departementsGrandEst = L.geoJSON(departementsGrandEst, {
-                style: {
-                    fillOpacity: 0
-                }
-            });
+      //onEachFeature
+      function nameOnEachFeature(feature, layer) {
+          if (feature.properties && feature.properties.name) {
+              layer.bindPopup(feature.properties.name);
+          }
+      }
 
-        //Séparation des établissement en fonction de 3 types et creation des points
+      var collegeMarkerOptions = createMarkerOptions("#FFFA2D");
+      var lyceeMarkerOptions = createMarkerOptions("#FFD72D");
+      var superieurMarkerOptions = createMarkerOptions("#FFA400");
 
-        var superieurs = L.geoJSON(grandEstEducation.features.filter(item => {
-                if (item.properties.type.includes("university")) {
-                    return item.properties.type.includes("university");
-                }
-                else if (item.properties.type.includes("college")) {
-                    return item.properties.type.includes("college");
-                }
-            }), {
-                pointToLayer: function (feature, latlng) {
-                    return L.circleMarker(latlng, superieurMarkerOptions);
-                }
-            });
+      // Import Data
+      var regionGrandEst = L.geoJSON(regionGrandEst, {
+        style: {
+          fillOpacity: 0,
+        },
+      });
+      var departementsGrandEst = L.geoJSON(departementsGrandEst, {
+        style: {
+          fillOpacity: 0,
+        },
+      });
 
-        var lycées = L.geoJSON(grandEstEducation.features.filter(item => {
-                if (item.properties.type_fr) {
-                    return (item.properties.type_fr.includes("lycée"));
-                }
+      //Séparation des établissement en fonction de 3 types et creation des points
 
-            }), {
-                pointToLayer: function (feature, latlng) {
-                    return L.circleMarker(latlng, lyceeMarkerOptions);
-                }
-            });
-        
-        var collèges = L.geoJSON(grandEstEducation.features.filter(item => {
-                if (item.properties.type_fr) {
-                    return (item.properties.type_fr.includes("collège"));
-                }
-
-            }), {
-                pointToLayer: function (feature, latlng) {
-                    return L.circleMarker(latlng, collegeMarkerOptions);
-                }
-            });
-
-        // 
-        /* console.log(Object.keys(lycées._layers).length + Object.keys(collèges._layers).length)
-        donne 851 établissements secondaires dans la base sur els 912 référencés par l'académie */
-        
-        // Creating map options
-        var mapOptions = {
-            center: [48.85, 6.2],
-            zoom: 8
-        }
-
-        // Creating a map object
-        var map = new L.map('map', mapOptions);
-
-        // Creating a Layer object
-        
-        var TileLayer = new L.TileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', 
+      var superieurs = L.geoJSON(
+        grandEstEducation.features.filter((item) => {
+          if (item.properties.type.includes("university")) {
+            return item.properties.type.includes("university");
+          } else if (item.properties.type.includes("college")) {
+            return item.properties.type.includes("college");
+          }
+        }),
         {
-            attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-            maxZoom: 18,
-            id: 'mapbox/light-v10',
-            tileSize: 512,
-            zoomOffset: -1,
-            accessToken: 'pk.eyJ1IjoicGxhcm9jY2EiLCJhIjoiY2wzYmNvajl4MGVjeTNrbnJyZDNvdTBzYSJ9.maFYrWAbWU8Wr6ITgj9XCA',
+          onEachFeature: nameOnEachFeature,
+          pointToLayer: function (feature, latlng) {
+            return L.circleMarker(latlng, superieurMarkerOptions);
+          },
         }
-        ).addTo(map);
+      );
 
-        /* Overlay */
-        var overlayMaps = {
-                "Region": regionGrandEst
-            };
-        map.addLayer(regionGrandEst); //define default layer
-        var layerControl = L.control.layers(null, overlayMaps).addTo(map);
-        layerControl.addOverlay(departementsGrandEst, "Départements");
-        layerControl.addOverlay(superieurs, "Établissements supérieurs");
-        layerControl.addOverlay(lycées, "Lycées");
-        layerControl.addOverlay(collèges, "Collèges");
-        //layerControl.addOverlay(nancyEducation, "Lieux d'enseignement");
+      var lycées = L.geoJSON(
+        grandEstEducation.features.filter((item) => {
+          if (item.properties.type_fr) {
+            return item.properties.type_fr.includes("lycée");
+          }
+        }),
+        {
+          onEachFeature: nameOnEachFeature,
+          pointToLayer: function (feature, latlng) {
+            return L.circleMarker(latlng, lyceeMarkerOptions);
+          },
+        }
+      );
+
+      var collèges = L.geoJSON(
+        grandEstEducation.features.filter((item) => {
+          if (item.properties.type_fr) {
+            return item.properties.type_fr.includes("collège");
+          }
+        }),
+        {
+          onEachFeature: nameOnEachFeature,
+          pointToLayer: function (feature, latlng) {
+            return L.circleMarker(latlng, collegeMarkerOptions);
+          },
+        }
+      );
+
+      //
+      /* console.log(Object.keys(lycées._layers).length + Object.keys(collèges._layers).length)
+        donne 851 établissements secondaires dans la base sur els 912 référencés par l'académie */
+
+      // Creating map options
+      var mapOptions = {
+        center: [48.85, 6.2],
+        zoom: 8,
+      };
+
+      // Creating a map object
+      var map = new L.map("map", mapOptions);
+
+      // Creating a Layer object
+
+      var TileLayer = new L.TileLayer(
+        "https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}",
+        {
+          attribution:
+            'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+          maxZoom: 18,
+          id: "mapbox/light-v10",
+          tileSize: 512,
+          zoomOffset: -1,
+          accessToken:
+            "pk.eyJ1IjoicGxhcm9jY2EiLCJhIjoiY2wzYmNvajl4MGVjeTNrbnJyZDNvdTBzYSJ9.maFYrWAbWU8Wr6ITgj9XCA",
+        }
+      ).addTo(map);
+
+      /* Overlay */
+      var overlayMaps = {
+        Region: regionGrandEst,
+      };
+
+      map.addLayer(regionGrandEst); //define default layer
+      var layerControl = L.control.layers(null, overlayMaps).addTo(map);
+      layerControl.addOverlay(departementsGrandEst, "Départements");
+      layerControl.addOverlay(superieurs, "Établissements supérieurs");
+      layerControl.addOverlay(lycées, "Lycées");
+      layerControl.addOverlay(collèges, "Collèges");
+      //layerControl.addOverlay(nancyEducation, "Lieux d'enseignement");
+
+      //map.fitBounds(geojson.getBounds());
     </script>
     <h2>Crédits</h2>
     <ul>
-        <li>
-            <b>Visualisation :</b> Leaflet
-        </li>
-        <li>
-            <b>Fond de carte :</b> Mapbox
-        </li>
+      <li><b>Visualisation :</b> Leaflet</li>
+      <li><b>Fond de carte :</b> Mapbox</li>
     </ul>
     <h3>Données</h3>
     <ul>
-        <li>
-            <b>Formes de la région Grand-Est et ses départements :</b> Grégoire David, <a href="https://france-geojson.gregoiredavid.fr/">france-geojson</a>.
-        </li>
-        <li>
-            <b>Établissement éducatifs :</b> <a href="https://geodatamine.fr/">GéoDataMine</a> 
-        </li>
+      <li>
+        <b>Formes de la région Grand-Est et ses départements :</b> Grégoire
+        David,
+        <a href="https://france-geojson.gregoiredavid.fr/">france-geojson</a>.
+      </li>
+      <li>
+        <b>Établissement éducatifs :</b>
+        <a href="https://geodatamine.fr/">GéoDataMine</a>
+      </li>
     </ul>
-</body>
-
+  </body>
 </html>
